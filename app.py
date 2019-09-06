@@ -1,4 +1,4 @@
-from quart import Quart, render_template, request, redirect, url_for, session 
+from quart import Quart, render_template, request, redirect, url_for, session, flash
 from bson import ObjectId
 # for ObjectId to work
 from pymongo import MongoClient
@@ -54,6 +54,12 @@ async def login():
             return redirect(url_for('posts'))
     return await render_template('login.html', error = error)
 
+
+@app.route('/logout/')
+async def logout():
+    session.po('logged_in', None)
+    await flash('You are logged out')
+    return redirect(url_for('posts'))
 
 
 
