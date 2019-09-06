@@ -40,10 +40,20 @@ async def create():
     print(client.list_database_names())
     return redirect(url_for('posts'))
 
-@app.route('/login')
-def login():
-    session['logged_in'] = True 
-    pass
+@app.route('/login/', methods = ['GET', 'POST'])
+async def login():
+    error = None 
+    if request.method == 'POST':
+        form = await request.form 
+        if form['username'] != app.config['USERNAME']:
+            error = 'Invalid username'
+        elif form['password'] != app.config['PASSWORD']:
+            error = 'Invalid password'
+        else:
+            session['logged_in'] = True
+            return redirect(url_for('posts'))
+    return await render_template('login.html', error = error)
+
 
 
 
