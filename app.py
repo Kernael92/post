@@ -45,6 +45,7 @@ def request_loader(request):
 def unauthorized_handler():
     return 'unauthorized'
 
+
 @app.route('/')
 async def index():
     # Displays the form
@@ -60,6 +61,7 @@ async def posts():
 
 
 @app.route('/', methods = ['POST'])
+@flask_login.login_required
 async def create():
     form = await request.form
     
@@ -71,23 +73,32 @@ async def create():
 
 @app.route('/login/', methods = ['GET', 'POST'])
 async def login():
-    error = None 
+    # error = None 
     if request.method == 'POST':
         form = await request.form 
-        if form['username'] != app.config['USERNAME']:
-            error = 'Invalid username'
-        elif form['password'] != app.config['PASSWORD']:
-            error = 'Invalid password'
-        else:
-            session['logged_in'] = True
+        username = form['username']
+        password = form['password']
+        if username in users and compare_digest(password, users[username]['password']):
+            user = User()
+            user.id = username 
+            flask_login.login_user(user)
             await flash('You are logged in')
             return redirect(url_for('posts'))
-    return await render_template('login.html', error = error)
+    return await render_template('login.html')   
+    #     if form['username'] != app.config['USERNAME']:
+    #         error = 'Invalid username'
+    #     elif form['password'] != app.config['PASSWORD']:
+    #         error = 'Invalid password'
+    #     else:
+    #         session['logged_in'] = True
+    #         await flash('You are logged in')
+    #         return redirect(url_for('posts'))
+    # return await render_template('login.html', error = error)
 
 
 @app.route('/logout/')
 async def logout():
-    session.po('logged_in', None)
+    flask_login.logout_user()
     await flash('You are logged out')
     return redirect(url_for('posts'))
 
