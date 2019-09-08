@@ -16,7 +16,7 @@ login_manager.init_app(app)
 client = MongoClient("mongodb://127.0.0.1:27017")
 db = client.blog
 blogs = db.blog 
-users = db.user
+myusers = db.users
 
 class User(flask_login.UserMixin):
     pass
@@ -108,8 +108,38 @@ async def register():
             users.insert_one({'username': username, 'password':password})
 
             return redirect(url_for('login'))
+
         flash(error)
-    return render_template('register.html')
+        
+    return await render_template('register.html')
+
+@app.route('/login', methods=('GET', 'POST'))
+async def login():
+    if request.method == 'POST':
+        username = await request.form['username']
+        password = await request.form['password']
+
+        error = None
+
+        for user in myusers.find( ):
+            if user is None:
+                error = 'Incorrect username'
+            elif not check_password_hash(user['password'], password):
+                error = 'Incorrect password'    
+            if error is None:
+                session.clear()
+                session['user_id'] = user['id']
+                return redirect(url_for('index'))
+
+            flash(error)
+
+        return await render_template('login.html')
+
+
+
+
+
+
 
 
 
