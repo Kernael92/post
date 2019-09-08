@@ -1,7 +1,16 @@
-<!DOCTYPE html>
-<html>
-    <body>
+{% extends 'base.html' %}
+
+
+{% block content %}
+    <div>
         <h2>Login</h2>
-        {% if error %} <p class="error"><strong>Error:</strong> {{ error }}</p>
-    </body>
-</html>
+        {% if error %}<p class="error"><strong>Error:</strong> {{ error }}{% endif %}
+    </div>
+    <div>
+        <form action="{{ url_for('login') }}" method='post'>
+            <p>Username: <input type="text" name="username" id="username" placeholder="username"></p>
+            <p>Password: <input type="text" name="password" id="password" placeholder="password"></p>
+            <p><input type="submit" name='Login'></p>
+        </form>
+    </div>
+{% endblock content %}   

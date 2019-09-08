@@ -1,21 +1,13 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Blog posts</title>
-    </head>
-    <body>
-        <div class="blogs">
-            <h1 style="font-size: 25px; font-weight: bold; ">Create a blog </h1>
-        </div>
-        <div>
-            <fieldset>
-                <form action="{{ url_for('create') }}" method="post" class="create-post">
-                    <p style="font-weight: bold; font-size: 20px;">Title: <input type="text" size="30" name="title">
-                    <p style="font-weight: bold; font-size: 20px;">Text: <textarea name="text" rows="5" cols="40"></textarea>
-                    <p style="cursor: wait;"><input type="submit" value="Post">
-                    </dl>
-                </form>
-            </fieldset>   
-        </div>
-    </body>
-</html>
+{% extends 'base.html' %}
+
+{% block content%}
+    <div class="blogs">
+        <!-- <h1 style="font-size: 25px; font-weight: bold; ">
+            
+            Welcome to my Blog post</h1>
+             -->
+        <p>Kindly Login to create or a view a blog post</p>
+        <p><a href="{{ url_for('login')}}">Login</a></p>
+    </div>
+    
+{% endblock content %}

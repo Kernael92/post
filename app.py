@@ -16,37 +16,34 @@ login_manager.init_app(app)
 client = MongoClient("mongodb://127.0.0.1:27017")
 db = client.blog
 blogs = db.blog 
+users = db.user
 
 class User(flask_login.UserMixin):
     pass
 
+
 @login_manager.user_loader
-def user_loader(username):
-    if username not in users:
-        return 
+def load_user(user_id):
+    return User.get(user_id)
 
-    user = User()
-    user.id = username 
-    return user 
+# @login_manager.request_loader
+# def request_loader(request):
+#     username = request.form.get('username')
+#     password = request.form.get('password', '')
+#     if username not in users:
+#         return 
 
-@login_manager.request_loader
-def request_loader(request):
-    username = request.form.get('username')
-    password = request.form.get('password', '')
-    if username not in users:
-        return 
-
-    user = User()
-    user.id = username 
-    user.is_authenticated = compare_digest(password, users[username]['password'])
-    return user 
+#     user = User()
+#     user.id = username 
+#     user.is_authenticated = compare_digest(password, users[username]['password'])
+#     return user 
 
 @login_manager.unauthorized_handler
 def unauthorized_handler():
     return 'unauthorized'
 
 
-@app.route('/')
+@app.route('/', methods=['GET'])
 async def index():
     # Displays the form
     return await render_template('index.html')
@@ -60,47 +57,69 @@ async def posts():
     
 
 
-@app.route('/', methods = ['POST'])
-@flask_login.login_required
+@app.route('/create', methods = ['POST'])
 async def create():
-    form = await request.form
-    
-    mylist = list(form.values())
-
-    blogs.insert_one({"title":mylist[0], "text":mylist[1]})
-    print(client.list_database_names())
-    return redirect(url_for('posts'))
-
-@app.route('/login/', methods = ['GET', 'POST'])
-async def login():
-    # error = None 
     if request.method == 'POST':
-        form = await request.form 
-        username = form['username']
-        password = form['password']
-        if username in users and compare_digest(password, users[username]['password']):
-            user = User()
-            user.id = username 
-            flask_login.login_user(user)
-            await flash('You are logged in')
-            return redirect(url_for('posts'))
-    return await render_template('login.html')   
-    #     if form['username'] != app.config['USERNAME']:
-    #         error = 'Invalid username'
-    #     elif form['password'] != app.config['PASSWORD']:
-    #         error = 'Invalid password'
-    #     else:
-    #         session['logged_in'] = True
-    #         await flash('You are logged in')
-    #         return redirect(url_for('posts'))
-    # return await render_template('login.html', error = error)
+        form = await request.form
+    
+        mylist = list(form.values())
+
+        blogs.insert_one({"title":mylist[0], "text":mylist[1]})
+        print(client.list_database_names())
+        return redirect(url_for('posts'))
+    return await render_template('create.html')
+
+# @app.route('/login/', methods = ['GET', 'POST'])
+# async def login():
+#     error = None 
+#     form = await request.form 
+#     if request.method == 'POST':
+#         user = User()
+#         flask_login.login_user(user)
+#         myusers = list(form.values())
+#         users.insert_one({'_id':user_id,'username': myusers[0], 'password':myusers[1]})
+#         await flash('You are logged in')
+#         return redirect(url_for('create'))
+#     return await render_template('login.html', form=form)   
+#     #     if form['username'] != app.config['USERNAME']:
+#     #         error = 'Invalid username'
+#     #     elif form['password'] != app.config['PASSWORD']:
+#     #         error = 'Invalid password'
+#     #     else:
+#     #         session['logged_in'] = True
+#     #         await flash('You are logged in')
+#     #         return redirect(url_for('posts'))
+#     # return await render_template('login.html', error = error)
+@app.route('/register', methods=('GET', 'POST'))
+async def register():
+    if request.method == 'POST':
+        username = await request.form['username']
+        password = await request.form['password']
+
+        error = None
+        if not username:
+            error = 'username is required'
+        elif not password:
+            error = 'Password is required'
+        elif username in users.find():
+            error = 'User {} is already registered'.format(username)
+
+        if error is None:
+            users.insert_one({'username': username, 'password':password})
+
+            return redirect(url_for('login'))
+        flash(error)
+    return render_template('register.html')
+
+
+
 
 
 @app.route('/logout/')
 async def logout():
     flask_login.logout_user()
     await flash('You are logged out')
-    return redirect(url_for('posts'))
+    return redirect(url_for('index'))
 
 
 
