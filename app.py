@@ -1,20 +1,49 @@
+import quart.flask_patch 
+import flask_login 
 from quart import Quart, render_template, request, redirect, url_for, session, flash
+from secrets import compare_digest 
 from bson import ObjectId
 # for ObjectId to work
 from pymongo import MongoClient
 import json
 
 app = Quart(__name__)
-app.config.update({
-    'SECRET_KEY': b'l\x95D,R9\xbe\xea\xe6+\xbd\x1be\xf0\xf76',
-    'USERNAME': 'username',
-    'PASSWORD': 'default',
+app.secret_key =b'\x85\x08\xcfu\xcd?\xff\xa9\x9a\xbfG\xd5\x9a\xa08\xf5'
 
-})
+login_manager = flask_login.LoginManager()
+login_manager.init_app(app)
 
 client = MongoClient("mongodb://127.0.0.1:27017")
 db = client.blog
 blogs = db.blog 
+
+class User(flask_login.UserMixin):
+    pass
+
+@login_manager.user_loader
+def user_loader(username):
+    if username not in users:
+        return 
+
+    user = User()
+    user.id = username 
+    return user 
+
+@login_manager.request_loader
+def request_loader(request):
+    username = request.form.get('username')
+    password = request.form.get('password', '')
+    if username not in users:
+        return 
+
+    user = User()
+    user.id = username 
+    user.is_authenticated = compare_digest(password, users[username]['password'])
+    return user 
+
+@login_manager.unauthorized_handler
+def unauthorized_handler():
+    return 'unauthorized'
 
 @app.route('/')
 async def index():
@@ -51,6 +80,7 @@ async def login():
             error = 'Invalid password'
         else:
             session['logged_in'] = True
+            await flash('You are logged in')
             return redirect(url_for('posts'))
     return await render_template('login.html', error = error)
 
