@@ -1,25 +1,35 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Blog Post</title>
-        <!-- Bootstrap 4 CDN -->
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-        <!-- fontawesome CDN -->
-        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
-        
-    </head>
-    <body>
-        <div>
-            {% for message in get_flashed_messages() %}
-            <h2>{{ message }}</h2>
-            {% endfor %}
-        </div>
+    <title> {% block title %}{% endblock %} Blog Post</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css')}}">
+    <!-- Bootstrap 4 CDN -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <!-- fontawesome CDN -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+    <nav>
+        <h1>Blog post</h1>
+        {% if g.user %}
+        <li><span>{{ g.user['username'] }}</span></li>
+        <li><a href="{{url_for('logout')}}">Log out</a></li>
+        {% else %}
+        <li><a href="{{url_for('register')}}">Register</a></li>
+        <li><a href="{{url_for('login')}}">Log In</a></li>
+        {% endif %}
+    </nav>
+    <section class="content">
+        <header>
+            {% block header %} {% endblock %}
+        </header>
+        {% for message in get_flashed_messages() %}
+        <div class="flash"><h2>{{ message }}</h2></div>
+        {% endfor %}
         <div class="content">
-            {% block content %}
-            {% endblock %}
+                {% block content %}
+                {% endblock %}
         </div>
         
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    </section>
+<html>     
         
-    </body>
-</html>
+    

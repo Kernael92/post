@@ -1,7 +1,8 @@
 import quart.flask_patch 
 import flask_login 
-from quart import Quart, render_template, request, redirect, url_for, session, flash
-from secrets import compare_digest 
+from quart import Quart, render_template, request, redirect, url_for, session, flash, g
+from werkzeug.security import check_password_hash, generate_password_hash
+import functools
 from bson import ObjectId
 # for ObjectId to work
 from pymongo import MongoClient
@@ -18,31 +19,6 @@ db = client.blog
 blogs = db.blog 
 myusers = db.users
 
-class User(flask_login.UserMixin):
-    pass
-
-
-@login_manager.user_loader
-def load_user(user_id):
-    return User.get(user_id)
-
-# @login_manager.request_loader
-# def request_loader(request):
-#     username = request.form.get('username')
-#     password = request.form.get('password', '')
-#     if username not in users:
-#         return 
-
-#     user = User()
-#     user.id = username 
-#     user.is_authenticated = compare_digest(password, users[username]['password'])
-#     return user 
-
-@login_manager.unauthorized_handler
-def unauthorized_handler():
-    return 'unauthorized'
-
-
 @app.route('/', methods=['GET'])
 async def index():
     # Displays the form
@@ -53,9 +29,6 @@ async def posts():
     # dispalays all blogs
     blogs_1 = blogs.find()
     return await render_template('posts.html',  blogs=blogs_1)
-
-    
-
 
 @app.route('/create', methods = ['POST'])
 async def create():
@@ -69,55 +42,35 @@ async def create():
         return redirect(url_for('posts'))
     return await render_template('create.html')
 
-# @app.route('/login/', methods = ['GET', 'POST'])
-# async def login():
-#     error = None 
-#     form = await request.form 
-#     if request.method == 'POST':
-#         user = User()
-#         flask_login.login_user(user)
-#         myusers = list(form.values())
-#         users.insert_one({'_id':user_id,'username': myusers[0], 'password':myusers[1]})
-#         await flash('You are logged in')
-#         return redirect(url_for('create'))
-#     return await render_template('login.html', form=form)   
-#     #     if form['username'] != app.config['USERNAME']:
-#     #         error = 'Invalid username'
-#     #     elif form['password'] != app.config['PASSWORD']:
-#     #         error = 'Invalid password'
-#     #     else:
-#     #         session['logged_in'] = True
-#     #         await flash('You are logged in')
-#     #         return redirect(url_for('posts'))
-#     # return await render_template('login.html', error = error)
+
 @app.route('/register', methods=('GET', 'POST'))
 async def register():
     if request.method == 'POST':
-        username = await request.form['username']
-        password = await request.form['password']
+        username = (await request.form)['username']
+        password = (await request.form)['password']
 
         error = None
         if not username:
             error = 'username is required'
         elif not password:
             error = 'Password is required'
-        elif username in users.find():
+        elif username in myusers.find():
             error = 'User {} is already registered'.format(username)
 
         if error is None:
-            users.insert_one({'username': username, 'password':password})
+            myusers.insert_one({'username': username, 'password':password})
 
             return redirect(url_for('login'))
 
         flash(error)
-        
+
     return await render_template('register.html')
 
 @app.route('/login', methods=('GET', 'POST'))
 async def login():
     if request.method == 'POST':
-        username = await request.form['username']
-        password = await request.form['password']
+        username = (await request.form)['username']
+        password = (await request.form)['password']
 
         error = None
 
@@ -129,27 +82,39 @@ async def login():
             if error is None:
                 session.clear()
                 session['user_id'] = user['id']
-                return redirect(url_for('index'))
+            return redirect(url_for('index'))
 
             flash(error)
 
-        return await render_template('login.html')
+    return await render_template('login.html')
 
+# @app.before_app_request
+# async def load_logged_in_user():
+#     '''
+#     Registers a function that runs before the view funcion
+#     no matter what url is requested.
+#     '''
+#     user_id = await session.get('user_id')
 
+#     if user_id is None:
+#         g.user = None 
+#     else:
+#         g.user = myusers.find({'_id':user_id})
 
-
-
-
-
-
-
-
-
-@app.route('/logout/')
+@app.route('/logout')
 async def logout():
-    flask_login.logout_user()
-    await flash('You are logged out')
+    session.clear()
     return redirect(url_for('index'))
+
+async def login_required(view):
+    @functools.wraps(view)
+    async def wrapped_view(**kwargs):
+        if g.user is None:
+            return redirect(url_for('login'))
+        return view(**kwargs)
+
+    return wrapped_view
+
 
 
 
