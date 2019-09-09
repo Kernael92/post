@@ -21,27 +21,6 @@ blogs = db.blog
 myusers = db.users
 
 
-
-
-
-
-
-
-
-
-    #     form = await request.form
-    
-    #     mylist = list(form.values())
-
-    #     blogs.insert_one({"title":mylist[0], "text":mylist[1]})
-    #     print(client.list_database_names())
-
-    #     x = blogs.delete_many({})
-    #     print(x.deleted_count, 'documents deleted')
-    #     return redirect(url_for('index'))
-    # return await render_template('create.html')
-
-
 @app.route('/register', methods=('GET', 'POST'))
 async def register():
     if request.method == 'POST':
@@ -145,7 +124,7 @@ async def create():
 
     return await render_template('create.html')
 
-async def get_post(id, check_author=True):
+def get_post(id, check_author=True):
     '''
     The function gets a post and calls it from both 
     the delete and update views 
@@ -161,6 +140,25 @@ async def get_post(id, check_author=True):
 
     return post
 
+@app.route('/update/<int:id>', methods=['GET', 'POST'])
+@login_required
+def update(id):
+    post = get_post(id)
+
+    if request.method == 'POST':
+        title = (await request.form)['title']
+        body = (await request.form)['body']
+        error = None 
+
+        if not title:
+            error = 'Title is required'
+
+        if error is not None:
+            flash(error)
+        else:
+            blogs.find_one_and_update({'title':title, 'body':body})
+            return redirect(url_for('index'))
+    return await render_template('update.html', post=post)
 
 
 
