@@ -3,21 +3,26 @@
 
 {% block header %}
   <h1>{% block title %}Posts{% endblock %}</h1>
+  {% if g.user %}
+  <a class="action" href="{{ url_for('create') }}">Create a new post</a>
+  {% endif %}
 {% endblock %}
 
 {% block content %}
     <div class="blogs">
         {% for blog in blogs %}
-            <div>
-                <center><h2>{{ blog.title }}</h2></center> 
-                <center><p>{{ blog.body }}</p></center>
-                
-            </div>
+            <article class="post">
+                <header>
+                    <div>
+                        <h1>{{ blog.title }}</h1>
+                </header>
+                <p class="body">{{ blog.body }}</p>
+            </article>
+            {% if not loop.last %}
+            <hr>
+            {%endif%}
         {% else %}
-            <div>No blogs available</div>
+            <div> <h1>No posts available</h1></div>
         {% endfor %}
-    </div>
-    <div>
-        <h2><a href="{{ url_for('create')}}">Add more posts</a></h2>
     </div>
 {% endblock content %}

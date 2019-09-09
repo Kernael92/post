@@ -4,7 +4,7 @@ from quart import Quart, render_template, request, redirect, url_for, session, f
 from werkzeug.security import check_password_hash, generate_password_hash
 import functools
 from bson import ObjectId
-from app.app import login_required
+# from . import login_required
 # for ObjectId to work
 from pymongo import MongoClient
 import json
@@ -20,31 +20,11 @@ db = client.blog
 blogs = db.blog 
 myusers = db.users
 
-@app.route('/', methods=['GET'])
-async def index():
-    # Displays posts
-    blogs_1 = blogs.find()
-    return await render_template('index.html', blogs=blogs_1)
 
-@app.route('/create', methods = ['GET','POST'])
-@login_required
-async def create():
-    if request.method == 'POST':
-        title = (await request.form)['title']
-        body = (await request.form)['body']
-        error = None 
 
-        if not title:
-            error = 'Title is required.'
-        
-        if error is not None:
-            flash(error)
-        else:
-            blogs.insert_one({'title': title, 'body': body})
 
-            return redirect(url_for('index'))
 
-    return await render_template('create.html')
+
 
 
 
@@ -82,7 +62,7 @@ async def register():
             return redirect(url_for('login'))
 
         flash(error)
-
+        
     return await render_template('register.html')
 
 @app.route('/login', methods=('GET', 'POST'))
@@ -107,32 +87,62 @@ async def login():
 
     return await render_template('login.html')
 
-# @app.before_app_request
-# async def load_logged_in_user():
-#     '''
-#     Registers a function that runs before the view funcion
-#     no matter what url is requested.
-#     '''
-#     user_id = await session.get('user_id')
+@app.before_request
+def load_logged_in_user():
+    user_id = session.get('user_id', '_id')
 
-#     if user_id is None:
-#         g.user = None 
-#     else:
-#         g.user = myusers.find({'_id':user_id})
+    if user_id is None:
+        g.user = None 
+    else:
+        g.user = myusers.find_one()
+    print("before_request is running!")
+    print(g.user)
+
+def login_required(view):
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        if g.user is None:
+            return redirect(url_for('login'))
+        return view(**kwargs)
+
+    return wrapped_view
+
 
 @app.route('/logout')
 async def logout():
     session.clear()
     return redirect(url_for('index'))
 
-async def login_required(view):
-    @functools.wraps(view)
-    async def wrapped_view(**kwargs):
-        if g.user is None:
-            return redirect(url_for('login'))
-        return view(**kwargs)
+@app.route('/', methods=['GET'])
+async def index():
+    # Displays posts
+    blogs_1 = blogs.find()
+    users = myusers.find()
+    print(db.list_collection_names())
+    
+    return await render_template('index.html', blogs=blogs_1, myusers=users)
 
-    return wrapped_view
+
+
+@app.route('/create', methods = ['GET','POST'])
+@login_required
+async def create():
+    if request.method == 'POST':
+        title = (await request.form)['title']
+        body = (await request.form)['body']
+        error = None 
+
+        if not title:
+            error = 'Title is required.'
+        
+        if error is not None:
+            flash(error)
+        else:
+            blogs.insert_one({'title': title, 'body': body})
+
+            return redirect(url_for('index'))
+
+    return await render_template('create.html')
 
 
 
