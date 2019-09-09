@@ -119,6 +119,7 @@ async def index():
     blogs_1 = blogs.find()
     users = myusers.find()
     print(db.list_collection_names())
+
     
     return await render_template('index.html', blogs=blogs_1, myusers=users)
 
@@ -143,6 +144,22 @@ async def create():
             return redirect(url_for('index'))
 
     return await render_template('create.html')
+
+async def get_post(id, check_author=True):
+    '''
+    The function gets a post and calls it from both 
+    the delete and update views 
+    '''
+    post = blogs.find()
+    user = myusers.find_one()
+
+    if post is None:
+        abort(404, "Post id {0} doesn't exist.".format(id))
+
+    if check_author and user['_id'] != g.user['id']:
+        abort (403)
+
+    return post
 
 
 

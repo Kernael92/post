@@ -17,6 +17,9 @@
                         <h1>{{ blog.title }}</h1>
                 </header>
                 <p class="body">{{ blog.body }}</p>
+                {% if g.user %}
+                <p>Created by {{ g.user['username'] }}</p>
+                {% endif %}
             </article>
             {% if not loop.last %}
             <hr>
