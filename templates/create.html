@@ -1,13 +1,18 @@
 {% extends 'base.html' %}
 
+{% block header %}
+    <h1>{% block title %} New Blog post{% endblock %}</h1>
+{% endblock%}
+
 {% block content %}
 <div>
     <fieldset>
-        <form action="{{ url_for('create') }}" method="post" class="create-post">
-            <p style="font-weight: bold; font-size: 20px;">Title: <input type="text" size="30" name="title">
-            <p style="font-weight: bold; font-size: 20px;">Text: <textarea name="text" rows="5" cols="40"></textarea>
-            <p style="cursor: wait;"><input type="submit" value="Post">
-            </dl>
+        <form method="post" class="create-post">
+            <label for="title">Title</label>
+            <input name="title" id='title' value="{{request.form['title']}}" required>
+            <label for="body">Body</label>
+            <textarea name="body" id="body" cols="30" rows="10">{{ request.form['body']}}</textarea>
+            <input type="submit" value='save'>
         </form>
     </fieldset>   
 </div>

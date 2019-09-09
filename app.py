@@ -4,6 +4,7 @@ from quart import Quart, render_template, request, redirect, url_for, session, f
 from werkzeug.security import check_password_hash, generate_password_hash
 import functools
 from bson import ObjectId
+from app.app import login_required
 # for ObjectId to work
 from pymongo import MongoClient
 import json
@@ -21,26 +22,44 @@ myusers = db.users
 
 @app.route('/', methods=['GET'])
 async def index():
-    # Displays the form
-    return await render_template('index.html')
-
-@app.route('/posts')
-async def posts():
-    # dispalays all blogs
+    # Displays posts
     blogs_1 = blogs.find()
-    return await render_template('posts.html',  blogs=blogs_1)
+    return await render_template('index.html', blogs=blogs_1)
 
-@app.route('/create', methods = ['POST'])
+@app.route('/create', methods = ['GET','POST'])
+@login_required
 async def create():
     if request.method == 'POST':
-        form = await request.form
-    
-        mylist = list(form.values())
+        title = (await request.form)['title']
+        body = (await request.form)['body']
+        error = None 
 
-        blogs.insert_one({"title":mylist[0], "text":mylist[1]})
-        print(client.list_database_names())
-        return redirect(url_for('posts'))
+        if not title:
+            error = 'Title is required.'
+        
+        if error is not None:
+            flash(error)
+        else:
+            blogs.insert_one({'title': title, 'body': body})
+
+            return redirect(url_for('index'))
+
     return await render_template('create.html')
+
+
+
+
+    #     form = await request.form
+    
+    #     mylist = list(form.values())
+
+    #     blogs.insert_one({"title":mylist[0], "text":mylist[1]})
+    #     print(client.list_database_names())
+
+    #     x = blogs.delete_many({})
+    #     print(x.deleted_count, 'documents deleted')
+    #     return redirect(url_for('index'))
+    # return await render_template('create.html')
 
 
 @app.route('/register', methods=('GET', 'POST'))

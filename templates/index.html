@@ -1,13 +1,23 @@
 {% extends 'base.html' %}
 
-{% block content%}
+
+{% block header %}
+  <h1>{% block title %}Posts{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
     <div class="blogs">
-        <!-- <h1 style="font-size: 25px; font-weight: bold; ">
-            
-            Welcome to my Blog post</h1>
-             -->
-        <p>Kindly Login to create or a view a blog post</p>
-        <p><a href="{{ url_for('login')}}">Login</a></p>
+        {% for blog in blogs %}
+            <div>
+                <center><h2>{{ blog.title }}</h2></center> 
+                <center><p>{{ blog.body }}</p></center>
+                
+            </div>
+        {% else %}
+            <div>No blogs available</div>
+        {% endfor %}
     </div>
-    
+    <div>
+        <h2><a href="{{ url_for('create')}}">Add more posts</a></h2>
+    </div>
 {% endblock content %}
