@@ -98,9 +98,10 @@ async def index():
     blogs_1 = blogs.find()
     users = myusers.find()
     print(db.list_collection_names())
-
     
-    return await render_template('index.html', blogs=blogs_1, myusers=users)
+    
+    
+    return await render_template('index.html', blogs=blogs_1, users=myusers)
 
 
 
@@ -126,24 +127,24 @@ async def create():
 
 def get_post(id, check_author=True):
     '''
-    The function gets a post and calls it from both 
+    The function gets a blog post and calls it from both 
     the delete and update views 
     '''
-    post = blogs.find()
-    user = myusers.find_one()
+    # blog = blogs.find_one()
+    # user = myusers.find_one()
+    for blog in blogs.find():
+        if blog is None:
+            abort(404, "Blog id {0} doesn't exist.".format(id))
 
-    if post is None:
-        abort(404, "Post id {0} doesn't exist.".format(id))
-
-    if check_author and user['_id'] != g.user['id']:
-        abort (403)
-
-    return post
+    for user in myusers.find():
+        if check_author and user['username'] != g.user['username']:
+            abort (403)
+    return blog
 
 @app.route('/update/<int:id>', methods=['GET', 'POST'])
 @login_required
-def update(id):
-    post = get_post(id)
+async def update(id):
+    blog = get_post(id)
 
     if request.method == 'POST':
         title = (await request.form)['title']
@@ -156,10 +157,16 @@ def update(id):
         if error is not None:
             flash(error)
         else:
-            blogs.find_one_and_update({'title':title, 'body':body})
+            blogs.find_one_and_update({'title':{'$regex':blog['title']}, 'body':{'$regex':blog['body']}}, {'$set':{'title':title}, '$set':{'body':body}})
             return redirect(url_for('index'))
-    return await render_template('update.html', post=post)
+    return await render_template('update.html', blog=blog)
 
+@app.route('/delete/<int:id>', methods=['POST'])
+@login_required
+async def delete(id):
+    get_post(id)
+    blogs.find_one_and_delete()
+    return redirect(url_for('index'))
 
 
 if __name__ == '__main__':
