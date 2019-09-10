@@ -13,7 +13,7 @@
     <!-- fontawesome CDN -->
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
     <title> {% block title %}{% endblock %} Blog Post</title>
-    <nav class="navbar navbar-expand-md navbar-light bg-transparent fixed-top">
+    <nav >
         <a class="navbar-brand"><img src="" alt=""></a>
         <button type="button" class="navbar-toggler bg-light" data-toggle="collapse" data-target="#nav">
             <span class="navbar-toggler-icon"></span>
@@ -33,12 +33,13 @@
         </div>
         
     </nav>
-    <header>
-        {% block header %} {% endblock %}
-    </header>
+    
 </head>
 <body>
     <section class="content">
+        <header>
+            {% block header %} {% endblock %}
+        </header>
         
         {% for message in get_flashed_messages() %}
         <div class="flash"><h2>{{ message }}</h2></div>
