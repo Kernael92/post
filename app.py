@@ -19,6 +19,8 @@ client = MongoClient("mongodb://127.0.0.1:27017")
 db = client.blog
 blogs = db.blog 
 myusers = db.users
+roles = db.roles
+
 
 
 @app.route('/register', methods=('GET', 'POST'))
@@ -40,7 +42,7 @@ async def register():
 
             return redirect(url_for('login'))
 
-        flash(error)
+        await flash(error)
         
     return await render_template('register.html')
 
@@ -62,9 +64,14 @@ async def login():
                 session['user_id'] = user['id']
             return redirect(url_for('index'))
 
-            flash(error)
+            await flash(error)
 
     return await render_template('login.html')
+
+@app.route('/logout')
+async def logout():
+    session.clear()
+    return redirect(url_for('index'))
 
 @app.before_request
 def load_logged_in_user():
@@ -87,10 +94,7 @@ def login_required(view):
     return wrapped_view
 
 
-@app.route('/logout')
-async def logout():
-    session.clear()
-    return redirect(url_for('index'))
+
 
 @app.route('/', methods=['GET'])
 async def index():
@@ -117,7 +121,7 @@ async def create():
             error = 'Title is required.'
         
         if error is not None:
-            flash(error)
+            await flash(error)
         else:
             blogs.insert_one({'title': title, 'body': body})
 
@@ -155,7 +159,7 @@ async def update(id):
             error = 'Title is required'
 
         if error is not None:
-            flash(error)
+            await flash(error)
         else:
             blogs.find_one_and_update({'title':{'$regex':blog['title']}, 'body':{'$regex':blog['body']}}, {'$set':{'title':title}, '$set':{'body':body}})
             return redirect(url_for('index'))
@@ -167,6 +171,26 @@ async def delete(id):
     get_post(id)
     blogs.find_one_and_delete()
     return redirect(url_for('index'))
+
+
+@app.route('/roles')
+async def roles():
+    if request.method == 'POST':
+        name = (await request.form)['name']
+        error = None
+
+        if not name:
+            error = 'Name is required'
+        if error is not None:
+            await flash(error)
+        else:
+            roles.insert({'name':name})
+            return redirect url_for('index')
+    return await render_template('roles.html')
+
+
+
+
 
 
 if __name__ == '__main__':
