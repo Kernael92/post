@@ -1,12 +1,38 @@
 {% extends 'base.html' %}
 
 {% block header %}
-  <h1>{% block title %} Home {% endblock %}</h1>
+  <h1>{% block title %}Admin{% endblock %}</h1>
+  {% if g.user %}
+  <a class="action" href="{{ url_for('create') }}">Create a new post</a>
+  {% endif %}
 {% endblock %}
 
+
 {% block content %}
-  <p><a href='{{ url_for("index") }}'>View Blog Posts</a></p>
-  <p><a href="{{ url_for('register')}}">Register</a></p>
-  <p><a href="{{ url_for('login')}}">Log in to create posts</a></p>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-4 col-md-4 col-sm-4">
+            <div class="card">
+                <div class="card-title">
+                    <h5> View blog posts</h5>
+                </div>
+                <div class="card-body">
+                    <button><a href='{{ url_for("index") }}'>Blog Posts</a></button>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-4 col-sm-4">
+            <div class="card">
+                <div class="card-title">
+                    <h5>Create a new blog post</h5>
+                </div>
+                <div class="card-body">
+                    <button><a href="{{ url_for('create')}}">Create a blog</a></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    </div>
 
 {% endblock %}

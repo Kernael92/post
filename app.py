@@ -162,7 +162,7 @@ async def create():
         else:
             blogs.insert_one({'title': title, 'body': body})
 
-            return redirect(url_for('index'))
+            return redirect(url_for('members'))
 
     return await render_template('create.html')
 
