@@ -32,3 +32,4 @@ input.danger { color: #cc2f2e; }
 input[type=submit] { align-self: start; min-width: 10em; } 
 .card{box-shadow: 10px 10px 5px #377ba8;  }
 .modal-content{background-color: #236AB9;}
+#card-text:hover{color:#D4E4F7; text-decoration: none;}

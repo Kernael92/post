@@ -8,12 +8,12 @@
 {% block content %}
 <div>
     <fieldset>
-        <form method="post" class="create-post" style="background-color:#B85B14 ">
+        <form method="post" class="create-post" style="background-color:#B85B14; font-family: serif; font-size: 22px;">
             <label for="title">Title</label>
             <input name="title" id='title' value="{{request.form['title']}}" required>
             <label for="body">Body</label>
             <textarea name="body" id="body" >{{ request.form['body']}}</textarea>
-            <input type="submit" value='save'>
+            <input type="submit" value='save' style="background-color: #FC7307;">
         </form>
     </fieldset>   
 </div>

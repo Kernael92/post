@@ -11,18 +11,18 @@
 {% block content %}
 <br><br>
 <div class="container-fluid">
-    <div class="card-deck" style="text-align: center;">
-        <div class="card">
+    <div class="card-deck w-60" style="text-align: center;">
+        <div class="card text-white" style="background-color: #341C09">
             <div class="card-body">
-            <h5 class="card-title">View Posts</h5>
+            {#<h5 class="card-title">View Posts</h5>#}
             <p class="card-text"><a href='{{ url_for("index") }}'>View posts</a></p>
             </div>
             <div class="card-footer">
             </div>
         </div>
-        <div class="card">
+        <div class="card text-white" style="background-color: #341C09">
             <div class="card-body">
-            <h5 class="card-title">Create Post</h5>
+            {#<h5 class="card-title">Create Post</h5>#}
             <p class="card-text"><a href='{{ url_for("create") }}'>Create a blog</p>
             </div>
             <div class="card-footer">
