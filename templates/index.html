@@ -9,48 +9,40 @@
 
 <br>
 <div class="container-fluid">
-    <div class='row'>
-        {% for blog in blogs %}
-        <div class="col-lg-2 col-md-2 col-sm-2">
-
-        </div>
-        <div class="col-lg-8 col-md-8 col-sm-8">
-            <div class='card w-80 text-black bg-primary mb-3 '>
-                <div class="card-body">
-                    <article>
-                        <header>
-                            <h3 class="card-title" style="text-align: center;">{{ blog['title'] }}</h3>
-                        </header>
-                        {# button to trigger modal #}
-                        {#<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal{{blog.title}}">Read blog</button>#}
-                        <body>
-                            <p>{{blog['body']}}</p>
-                        </body>
-                        <footer>
-                        {% if g.user %}
-                        <p style="color: #D4E4F7; text-align: center; font-style: italic; font-size:20px;">Written by {{ g.user['username'] }}</p>
+    {% for blog in blogs %}
+    <div class="card-deck">
+        <div class='card w-80 text-black bg-primary mb-3 '>
+            <div class="card-body">
+                <article>
+                    <header>
+                        <h3 class="card-title" style="text-align: center;">{{ blog['title'] }}</h3>
+                    </header>
+                    {# button to trigger modal #}
+                    {#<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal{{blog.title}}">Read blog</button>#}
+                    <body>
+                        <p>{{blog['body']}}</p>
+                    </body>
+                    <footer>
+                    {% if g.user %}
+                    <p style="color: #D4E4F7; text-align: center; font-style: italic; font-size:20px;">Written by {{ g.user['username'] }}</p>
+                    {% endif %}
+                    {% for user in users.find() %}
+                        {% if g.user['username'] == user['username'] %}
+                        <p style="text-align: center; font-size:20px; font-weight: 200;"><a class="action" href="{{ url_for('update', id=blog['id']) }}" style="color: #341C09; ">Edit Post</a></p>
                         {% endif %}
-                        {% for user in users.find() %}
-                            {% if g.user['username'] == user['username'] %}
-                            <p style="text-align: center; font-size:20px; font-weight: 200;"><a class="action" href="{{ url_for('update', id=blog['id']) }}" style="color: #341C09; ">Edit Post</a></p>
-                            {% endif %}
-                        </footer>
-                        {% endfor %}
-                    </article>
-                    {% if not loop.last %}
-                    
-                    {%endif%}
-                </div>
+                    </footer>
+                    {% endfor %}
+                </article>
+                {% if not loop.last %}
+                
+                {%endif%}
             </div>
-       
-        {% else %}
-            <div> <h1>No posts available</h1></div>
-        {% endfor %}
         </div>
-    <div class="col-lg-2 col-md-2 col-sm-2">
-    </div>           
     </div>
-  
+    {% else %}
+        <div> <h1>No posts available</h1></div>
+    {% endfor %}
+</div>
     {% for blog in blogs %}
     {# The modal #}
     <div class="modal fade" tabindex="-1" role="dialog" id="myModal">
