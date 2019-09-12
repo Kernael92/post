@@ -9,6 +9,7 @@ from bson import ObjectId
 # for ObjectId to work
 from pymongo import MongoClient
 import json
+from blog import User
 
 
 app = Quart(__name__)
@@ -43,11 +44,9 @@ def unauthorized_handler():
 
 @app.route('/register', methods=('GET', 'POST'))
 async def register():
-    form = await request.form
     if request.method == 'POST':
-        user = User()
-        username = user['username']
-        password = user['password']
+        username = (await request.form)['username']
+        password = (await request.form)['password']
 
         error = None
         if not username:
@@ -58,21 +57,21 @@ async def register():
             error = 'User {} is already registered'.format(username)
 
         if error is None:
-            myusers.insert_one(user)
+            myusers.insert_one({'username':username, 'password':password})
 
             return redirect(url_for('login'))
 
         await flash(error)
         
-    return await render_template('register.html', form=form)
+    return await render_template('register.html')
 
 @app.route('/login', methods=('GET', 'POST'))
 async def login():
-    form = await request.form
     if request.method == 'POST':
-        user = User()
-        username = user['username']
-        password = user['password']
+        # user = User()
+        username = (await request.form)['username']
+        password = (await request.form)['password']
+
 
         error = None
 
@@ -83,13 +82,14 @@ async def login():
                 error = 'Incorrect password'    
             if error is None:
                 flask_login.login_user(user)
-                session.pop(user, None)
+                await flash('Logged in successfully')
                 session['user_id'] = user['id']
-            return redirect(url_for('member'))
+                print(user)
+            return redirect(url_for('members'))
 
             await flash(error)
 
-    return await render_template('login.html', form)
+    return await render_template('login.html')
 
 @app.route('/logout')
 async def logout():
@@ -100,11 +100,12 @@ async def logout():
 @app.before_request
 def load_logged_in_user():
     user_id = session.get('user_id', '_id')
-
     if user_id is None:
         g.user = None 
     else:
-        g.user = myusers.find_one()
+        g.user = myusers.find_one(
+            {'username':'session["username"]'}
+            )
     print("before_request is running!")
     print(g.user)
 
@@ -112,7 +113,7 @@ def login_required(view):
     @functools.wraps(view)
     def wrapped_view(**kwargs):
         if g.user is None:
-            return redirect(url_for('loginhandler'))
+            return redirect(url_for('login'))
         return view(**kwargs)
 
     return wrapped_view
@@ -163,7 +164,9 @@ async def index():
     blogs_1 = blogs.find()
     users = myusers.find()
     print(db.list_collection_names())
+
     
+
     
     
     return await render_template('index.html', blogs=blogs_1, users=myusers)
@@ -244,7 +247,7 @@ async def home():
 @app.route('/members')
 @login_required
 async def members():
-    if not flask_login.current_user.is_authenticated:
+    if not g.user:
         return redirect(url_for('register'))
     return await render_template('members.html')
 
@@ -253,6 +256,8 @@ async def members():
 @app.route('/admin')
 @role_required
 async def admin():
+    if not g.user.is_admin:
+        return redirect(url_for('login'))
     return await render_template('admin.html')
 
 
