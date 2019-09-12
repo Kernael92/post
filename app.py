@@ -1,6 +1,6 @@
 import quart.flask_patch 
 import flask_login 
-from quart import Quart, render_template, request, redirect, url_for, session, flash, g
+from quart import Quart, render_template, request, redirect, url_for, session, flash, g, abort
 from werkzeug.security import check_password_hash, generate_password_hash
 import functools
 from bson import ObjectId
@@ -60,7 +60,7 @@ async def login():
             elif not check_password_hash(user['password'], password):
                 error = 'Incorrect password'    
             if error is None:
-                session.clear()
+                session.pop(user, None)
                 session['user_id'] = user['id']
             return redirect(url_for('index'))
 
@@ -70,7 +70,7 @@ async def login():
 
 @app.route('/logout')
 async def logout():
-    session.clear()
+    session.pop('user', None)
     return redirect(url_for('index'))
 
 @app.before_request
@@ -89,6 +89,43 @@ def login_required(view):
     def wrapped_view(**kwargs):
         if g.user is None:
             return redirect(url_for('login'))
+        return view(**kwargs)
+
+    return wrapped_view
+
+
+@app.route('/roles')
+async def roles():
+    if request.method == 'POST':
+        name = (await request.form)['admin']
+        error = None
+
+        if not name:
+            error = 'name is required'
+        if error is not None:
+            await flash(error)
+        else:
+            roles.insert({'admin':name})
+            return redirect (url_for('index'))
+            
+    return await render_template('roles.html')
+
+
+@app.before_request
+def load_logged_in_role():
+    role_id = session.get('role_id', '_id')
+
+    if role_id is None:
+        g.role = None 
+    else:
+        g.role = roles
+        print(g.role)
+
+def role_required(view):
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        if g.role is None:
+            return redirect(url_for('roles'))
         return view(**kwargs)
 
     return wrapped_view
@@ -143,6 +180,7 @@ def get_post(id, check_author=True):
     for user in myusers.find():
         if check_author and user['username'] != g.user['username']:
             abort (403)
+            print(myusers.find())
     return blog
 
 @app.route('/update/<int:id>', methods=['GET', 'POST'])
@@ -173,20 +211,21 @@ async def delete(id):
     return redirect(url_for('index'))
 
 
-@app.route('/roles')
-async def roles():
-    if request.method == 'POST':
-        name = (await request.form)['name']
-        error = None
+@app.route('/home')
+async def home():
+    return await render_template('home.html')
 
-        if not name:
-            error = 'Name is required'
-        if error is not None:
-            await flash(error)
-        else:
-            roles.insert({'name':name})
-            return redirect url_for('index')
-    return await render_template('roles.html')
+@app.route('/members')
+@login_required
+async def members():
+    return await render_template('members.html')
+
+@app.route('/admin')
+@role_required
+async def admin():
+    return await render_template('admin.html')
+
+
 
 
 

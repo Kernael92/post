@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 
+
 {% block header %}
   <h1>{% block title %}Posts{% endblock %}</h1>
   {% if g.user %}
@@ -8,34 +9,31 @@
 {% endblock %}
 
 {% block content %}
-
-<br>
-<div class="container-fluid">
+{% for blog in blogs %}
     <div class='row'>
-        {% for blog in blogs %}
-        <div class="col-lg-4 col-md-4 col-sm-4">
-            <div class='card'>
+        <div class="col-sm-6 col-md-6 col-lg-6">
+            <div class='card'  style="width: 18rem;">
                 <div class="card-body">
                     <article>
                         <header>
-                            <h5 class="card-title">{{ blog['title'] }}</h1>
+                            <h1 class="card-title">{{ blog['title'] }}</h1>
                         </header>
                         {# button to trigger modal #}
-                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal{{ blog['id'] }}">Read blog</button>
-                        
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalLong">Read blog</button>
+                        <p class="card-text">{{ blog['body'] }}</p>
                         <footer>
                         {% if g.user %}
                         <p>Created by {{ g.user['username'] }}</p>
                         {% endif %}
                         {% for user in users.find() %}
-                            {% if g.user['username'] == user['username'] %}
+                            {% if g.user['id'] == user['id'] %}
                             <p><a class="action" href="{{ url_for('update', id=blog['id']) }}">Edit Post</a></p>
                             {% endif %}
                         </footer>
                         {% endfor %}
                     </article>
                     {% if not loop.last %}
-                    
+                    <hr>
                     {%endif%}
                 </div>
             </div>
@@ -45,30 +43,26 @@
         {% endfor %}           
     </div>
     {% for blog in blogs %}
-    {# The modal #}
-    <div class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal fade" id="exampleModalLong" tabindex="-1" aria-labelledby="exampleModalLongTitle" aria-hidden='true'>
         <div class="modal-dialog" role='document'>
             <div class="modal-content">
-                {# modal header #}
                 <div class="modal-header">
-                    <h2 class="modal-title">{{ blog['title'] }}</h2>
+                    <h2 class="modal-title" id="exampleModalLongTitle">{{ blog['title'] }}</h2>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                {# Modal body #}
                 <div class="modal-body">
                     <p>{{ blog['body']}}</p>
 
                 </div>
-                {# Modal footer #}
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" data-dismis="modal">Close</button>
                     {% if g.user %}
                         <p>Created by {{ g.user['username'] }}</p>
                     {% endif %}
                     {% for user in users.find() %}
-                        {% if g.user['username'] == user['username'] %}
+                        {% if g.user['id'] == user['id'] %}
                         <button><a class="action" href="{{ url_for('update', id=blog['id']) }}">Edit Post</a></button>
                         {% endif %}
                     {% endfor %}
@@ -80,6 +74,5 @@
         </div>
 
     </div>
-</div>
-{% endfor %}
+    {% endfor %}
 {% endblock content %}
