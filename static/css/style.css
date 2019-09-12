@@ -1,9 +1,12 @@
+@import url('https://fonts.googleapis.com/css?family=Nanum+Gothic');
+
 html { font-family: sans-serif; background: #D4E4F7; padding: 1rem; }
 body { padding:20px;
     margin: 20px;
     border: 20px;margin: 0 auto; background: #D4E4F7; }
-h1 { font-family: serif; color: #B85B14; margin: 1rem 0; }
-h5 { font-family: serif; color: #B85B14; margin: 1rem 0; } 
+h1 { font-family: serif; color: #B85B14; margin: 1rem 0; font-weight: bold;}
+h3 { font-family: serif; color: #D4E4F7; margin: 1rem 0; font-weight: bold;} 
+p {font-family: serif; margin: 1rem 0; font-size: 20px;}
 a { color: #341C09; }
 hr { border: none; border-top: 1px solid #D4E4F7; }
 nav { background: #341C09; display: flex; align-items: center; padding: 0 0.5rem; }
@@ -27,5 +30,5 @@ nav ul li a, nav ul li span, header .action { display: block; padding: 0.5rem; }
 .content textarea { min-height: 12em; resize: vertical; }
 input.danger { color: #cc2f2e; }
 input[type=submit] { align-self: start; min-width: 10em; } 
-.card{box-shadow: 10px 10px 5px #377ba8; background-color:#236AB9 }
+.card{box-shadow: 10px 10px 5px #377ba8;  }
 .modal-content{background-color: #236AB9;}
