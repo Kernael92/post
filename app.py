@@ -13,8 +13,7 @@ from blog import User
 
 
 app = Quart(__name__)
-app.secret_key =b'\x85\x08\xcfu\xcd?\xff\xa9\x9a\xbfG\xd5\x9a\xa08\xf5'
-
+app.secret_key =config('SECRET_KEY')
 
 
 
@@ -296,6 +295,17 @@ async def admin():
         await flash("You do not have access to that page. Sorry!")
         return redirect(url_for('members'))   
     return await render_template('admin.html')
+
+
+# @app.route('/comment/<int:id>', methods = ['GET', 'POST'])
+# async def comment(id):
+#     blog = get_post(id)
+
+#     if request.method == 'POST':
+#         text = (await request.form)['text']
+
+
+
         
 
 
