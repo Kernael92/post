@@ -30,9 +30,32 @@ login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
 
 # create user loader function 
+# @login_manager.user_loader
+# def load_user(username):
+#     user_id = User('username')
+#     return user_id
+
 @login_manager.user_loader
-def load_user(user_id):
-    return User.get(user_id)
+def user_loader(username):
+    if username not in myusers.find():
+        return
+
+    user = User()
+    user.id = username
+    return user
+
+@login_manager.request_loader
+def request_loader(request):
+    username = request.form.get('username')
+    password = request.form.get('password', '')
+    access = request.form.get('access')
+    if username not in myusers.find():
+        return
+
+    user = User()
+    user.id = username
+    user.is_authenticated = compare_digest(password, myusers[username]['password'])
+    return user
 
 @login_manager.unauthorized_handler
 def unauthorized_handler():
@@ -47,17 +70,21 @@ async def register():
     if request.method == 'POST':
         username = (await request.form)['username']
         password = (await request.form)['password']
+        access = (await request.form)['access']
+
 
         error = None
         if not username:
             error = 'username is required'
         elif not password:
             error = 'Password is required'
+        elif not access:
+            error = 'Access is required'
         elif username in myusers.find():
             error = 'User {} is already registered'.format(username)
 
         if error is None:
-            myusers.insert_one({'username':username, 'password':password})
+            myusers.insert_one({'username':username, 'password':password, 'access':access})
 
             return redirect(url_for('login'))
 
@@ -71,6 +98,7 @@ async def login():
         # user = User()
         username = (await request.form)['username']
         password = (await request.form)['password']
+        access = (await request.form)['access']
 
 
         error = None
@@ -80,10 +108,12 @@ async def login():
                 error = 'Incorrect username'
             elif not check_password_hash(user['password'], password):
                 error = 'Incorrect password'    
+            elif not user['access']:
+                error = 'Incorrect password'
             if error is None:
                 flask_login.login_user(user)
                 await flash('Logged in successfully')
-                session['user_id'] = user['id']
+                # session['username'] = username
                 print(user)
             return redirect(url_for('members'))
 
@@ -99,13 +129,12 @@ async def logout():
 
 @app.before_request
 def load_logged_in_user():
-    user_id = session.get('user_id', '_id')
+    user_id = session.get('username', 'username')
     if user_id is None:
         g.user = None 
     else:
-        g.user = myusers.find_one(
-            {'username':'session["username"]'}
-            )
+        g.user = myusers.find_one({})
+    
     print("before_request is running!")
     print(g.user)
 
@@ -164,8 +193,9 @@ async def index():
     blogs_1 = blogs.find()
     users = myusers.find()
     print(db.list_collection_names())
-
     
+
+    # myusers.drop()
 
     
     
@@ -256,7 +286,7 @@ async def members():
 @app.route('/admin')
 @role_required
 async def admin():
-    if not g.user.is_admin:
+    if not current_user.is_admin:
         return redirect(url_for('login'))
     return await render_template('admin.html')
 
