@@ -196,7 +196,8 @@ async def index():
     print(db.list_collection_names())
     
 
-    # myusers.drop()
+    # for blog in blogs.find():
+    #     print(blog)
 
     
     
@@ -256,8 +257,11 @@ async def update(id):
 
         if error is not None:
             await flash(error)
-        else:
+        elif  g.user['access'] == 'admin':
             blogs.find_one_and_update({'title':{'$regex':blog['title']}, 'body':{'$regex':blog['body']}}, {'$set':{'title':title}, '$set':{'body':body}})
+            return redirect(url_for('index'))
+        else:
+            await flash('Only admin can edit a post')
             return redirect(url_for('index'))
     return await render_template('update.html', blog=blog)
 
@@ -289,7 +293,8 @@ async def members():
 async def admin():
     # for user in myusers.find():
     if not g.user['access'] == 'admin':
-        return redirect(url_for('members', message="You do not have access to that page. Sorry!"))
+        await flash("You do not have access to that page. Sorry!")
+        return redirect(url_for('members'))   
     return await render_template('admin.html')
         
 

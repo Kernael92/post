@@ -21,10 +21,12 @@
                 <li></li>
                 
                 {% if g.user%}
+                <li class="nav-item "><a class="nav-link text-light font-weight-bold px-3" href="{{url_for('index')}}">Home</a></li>
                 <li class="nav-item"><span class="nav-link text-light font-weight-bold px-3" >{{ g.user['username'] }}</span></li>
                 <li class="nav-item "><a class="nav-link text-light font-weight-bold px-3" href="{{url_for('logout')}}">Log out</a></li>
                 <li class="nav-item "><a class="nav-link text-light font-weight-bold px-3" href="{{url_for('members')}}">Members page</a></li>
                 <li class="nav-item "><a class="nav-link text-light font-weight-bold px-3" href="{{url_for('admin')}}">admin page</a></li>
+                
                 {% else %}
                 <li class="nav-item "><a class="nav-link text-light font-weight-bold px-3" href="{{url_for('index')}}">Home</a></li>
                 {% endif %}
