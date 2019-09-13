@@ -125,6 +125,7 @@ async def login():
 async def logout():
     # session.pop['logged_in', None]
     flask_login.logout_user()
+    myusers.delete_one({})
     return redirect(url_for('index'))
 
 @app.before_request
@@ -235,7 +236,7 @@ def get_post(id, check_author=True):
             abort(404, "Blog id {0} doesn't exist.".format(id))
 
     for user in myusers.find():
-        if check_author and user['id'] != g.user['id']:
+        if check_author and user['username'] != g.user['username']:
             abort (403)
             print(myusers.find())
     return blog
@@ -286,9 +287,11 @@ async def members():
 @app.route('/admin')
 @role_required
 async def admin():
-    if not current_user.is_admin:
-        return redirect(url_for('login'))
+    # for user in myusers.find():
+    if not g.user['access'] == 'admin':
+        return redirect(url_for('members', message="You do not have access to that page. Sorry!"))
     return await render_template('admin.html')
+        
 
 
 
