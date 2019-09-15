@@ -6,8 +6,41 @@
 {% endblock%}
 
 {% block content %}
-<div>
-    <fieldset>
+<div class="container register">
+    <div class="row">
+        <div class="col-md-3 register-left">
+        <img src="https://image.ibb.co/n7oTvU/logo_white.png" alt="">
+        <h1>Welcome</h1>
+        </div>
+        <div class="col-md-9 register-right">
+        <div class="tab-pane fade show active" id='home' role="tabpanel" arial-labelledby="home-tab">
+            <h3 class="register-heading">Create a Blog post</h3>
+            <div class="col-md-6">
+            <div class="row register-form">
+                <div class="form-group">
+                    <form method="post" class="create-post">
+                        <label for="title">Title</label>
+                        <input name="title" id='title' value="{{request.form['title']}}" required>
+                        <label for="body">Body</label>
+                        <textarea name="body" id="body" >{{ request.form['body']}}</textarea>
+                        <input type="submit" value='save' class="btnRegister">
+                    </form>
+                </div>
+            </div>
+            </div>
+    
+        </div>
+    
+        </div>
+    
+    </div>
+    
+    </div>
+
+
+
+{#<div>
+    <center><fieldset>
         <form method="post" class="create-post" style="background-color:#B85B14; font-family: serif; font-size: 22px;">
             <label for="title">Title</label>
             <input name="title" id='title' value="{{request.form['title']}}" required>
@@ -15,6 +48,6 @@
             <textarea name="body" id="body" >{{ request.form['body']}}</textarea>
             <input type="submit" value='save' style="background-color: #FC7307;">
         </form>
-    </fieldset>   
-</div>
+    </fieldset></center>   
+</div>#}
 {% endblock %}

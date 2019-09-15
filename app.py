@@ -13,7 +13,8 @@ from blog import User
 
 
 app = Quart(__name__)
-app.secret_key =config('SECRET_KEY')
+app.secret_key =b'\x85\x08\xcfu\xcd?\xff\xa9\x9a\xbfG\xd5\x9a\xa08\xf5'
+
 
 
 
@@ -108,32 +109,31 @@ async def login():
             elif not check_password_hash(user['password'], password):
                 error = 'Incorrect password'    
             elif not user['access']:
-                error = 'Incorrect password'
+                error = 'Incorrect access'
             if error is None:
                 flask_login.login_user(user)
-                await flash('Logged in successfully')
-                # session['username'] = username
-                print(user)
+                session.clear()
+                session[user_id] = user['_id']
+            await flash('Logged in successfully')
             return redirect(url_for('members'))
 
-            await flash(error)
-
+        await flash(error)       
     return await render_template('login.html')
 
 @app.route('/logout')
 async def logout():
-    # session.pop['logged_in', None]
     flask_login.logout_user()
+    # session.clear()
     myusers.delete_one({})
     return redirect(url_for('index'))
 
 @app.before_request
 def load_logged_in_user():
-    user_id = session.get('username', 'username')
+    user_id = session.get('user_id', '_id')
     if user_id is None:
         g.user = None 
     else:
-        g.user = myusers.find_one({})
+        g.user = myusers.find_one()
     
     print("before_request is running!")
     print(g.user)

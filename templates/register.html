@@ -5,9 +5,55 @@
 {% endblock %}
 
 {% block content %}
-  <form  method="post" style="background-color:#B85B14; font-family: serif; font-size: 20px;">
+<div class="container register">
+  <div class="row">
+    <div class="col-md-3 register-left">
+      <img src="https://image.ibb.co/n7oTvU/logo_white.png" alt="">
+      <h1>Welcome</h1>
+    </div>
+    <div class="col-md-9 register-right">
+      <div class="tab-pane fade show active" id='home' role="tabpanel" arial-labelledby="home-tab">
+        <ul class="nav nav-tabs nav-justified" id="myTab" role="tablist">
+          <li class="nav-item">
+            <a class="nav-link" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-selected="true">Register</a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link" id="home-tab"  href="{{url_for('login')}}" role="tab" aria-selected="true">Login</a>
+            </li>
+
+        </ul>
+        <h3 class="register-heading">Create an account</h3>
+        <div class="col-md-6">
+          <div class="row register-form">
+            <div class="form-group">
+              <form  method="post">
+                <label for="username">Username</label>
+                <input name="username" id="username" placeholder="username" unique="true" required>
+                <label for="password">Password</label>
+                <input type="password" name="password" id="password" placeholder="password" required>
+                <label for="acess">Access</label>
+                <div>
+                  <input type="radio" name="access" id="user" value="user">
+                  <label for="admin">user</label>
+                  <input type="radio" name="access" id="admin" value="admin">
+                  <label for="admin">admin</label>
+                </div>
+                <input type="submit" class="btnRegister" value="Register">
+              </form>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+{#<form  method="post" class="form-group">
     <label for="username">Username</label>
-    <input name="username" id="username" required>
+    <input name="username" id="username" placeholder="username" required>
     <label for="password">Password</label>
     <input type="password" name="password" id="password" required>
     <label for="acess">Access</label>
@@ -17,6 +63,7 @@
       <input type="radio" name="access" id="admin" value="admin">
       <label for="admin">admin</label>
     </div>
-    <input type="submit" value="Register" style="background-color: #FC7307;">
-  </form>
+    <input type="submit" value="Register">
+  </form>#}
+  
 {% endblock %}
