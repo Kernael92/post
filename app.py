@@ -2,7 +2,7 @@ import quart.flask_patch
 import flask_login 
 from flask_login import current_user, login_required, login_user, logout_user
 from quart import Quart, render_template, request, redirect, url_for, session, flash, g, abort
-from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash, secure_filename
 import functools
 from bson import ObjectId
 # from . import login_required
@@ -14,6 +14,10 @@ from blog import User
 
 app = Quart(__name__)
 app.secret_key =b'\x85\x08\xcfu\xcd?\xff\xa9\x9a\xbfG\xd5\x9a\xa08\xf5'
+app.config['UPLOAD_FOLDER']
+# Defines path for upload folder
+app.config['MAX_CONTENT_PATH']
+# Specifies max size of file to be uploaded
 
 
 
@@ -302,6 +306,12 @@ async def admin():
         await flash("You do not have access to that page. Sorry!")
         return redirect(url_for('members'))   
     return await render_template('admin.html')
+
+@app.route('/upload', methods=['GET', 'POST'])
+
+
+
+
 
 
 # @app.route('/comment/<int:id>', methods = ['GET', 'POST'])

@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+
+{% block header %}
+    <h1>{% block title %} New Blog post{% endblock %}</h1>
+{% endblock%}
+
+{% block content %}
+<div class="container register">
+    <div class="row">
+        <div class="col-md-3 register-left">
+        <img src="https://image.ibb.co/n7oTvU/logo_white.png" alt="">
+        <h1>Welcome</h1>
+        </div>
+        <div class="col-md-9 register-right">
+        <div class="tab-pane fade show active" id='home' role="tabpanel" arial-labelledby="home-tab">
+            <h3 class="register-heading">Create a Blog post</h3>
+            <div class="col-md-6">
+            <div class="row register-form">
+                <div class="form-group">
+                    <form action="{{url_for('upload')}}" method="post" class="create-post" enctype="multipart/form-data">
+                        <input type="file" name="file" required>
+                        <input type="submit" value='save' class="btnRegister">
+                    </form>
+                </div>
+            </div>
+            </div>
+    
+        </div>
+    
+        </div>
+    
+    </div>
+    
+</div>
+{% endblock%}
