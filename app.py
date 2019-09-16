@@ -260,7 +260,7 @@ async def update(id):
         if error is not None:
             await flash(error)
         elif  g.user['access'] == 'admin':
-            newblog = blogs.find_one_and_update({'title':{'$regex':blog['title']}, 'body':{'$regex':blog['body']}}, {'$set':{'title':title}, '$set':{'body':body}})
+            blogs.find_one_and_update({'title':blog['title'], 'body':blog['body']}, {'$set':{'title':title, 'body':body}})
             return redirect(url_for('index'))
         else:
             await flash('Only admin can edit a post')
