@@ -2,7 +2,10 @@ import quart.flask_patch
 import flask_login 
 from flask_login import current_user, login_required, login_user, logout_user
 from quart import Quart, render_template, request, redirect, url_for, session, flash, g, abort
-from werkzeug.security import check_password_hash, generate_password_hash, secure_filename
+from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug import secure_filename
+
+import os
 import functools
 from bson import ObjectId
 # from . import login_required
@@ -11,12 +14,16 @@ from pymongo import MongoClient
 import json
 from blog import User
 
+UPLOAD_FOLDER = '/tmp/'
+
+
 
 app = Quart(__name__)
+app.config['UPLOADER_FOLDER'] = UPLOAD_FOLDER
 app.secret_key =b'\x85\x08\xcfu\xcd?\xff\xa9\x9a\xbfG\xd5\x9a\xa08\xf5'
-app.config['UPLOAD_FOLDER']
+# app.config['UPLOAD_FOLDER']
 # Defines path for upload folder
-app.config['MAX_CONTENT_PATH']
+# app.config['MAX_CONTENT_PATH']
 # Specifies max size of file to be uploaded
 
 
@@ -26,7 +33,7 @@ client = MongoClient("mongodb://127.0.0.1:27017")
 db = client.blog
 blogs = db.blog 
 myusers = db.users
-roles = db.roles
+files = db.files
 
 # initialize flask-login 
 
@@ -199,8 +206,8 @@ async def index():
     print(db.list_collection_names())
     
     
-    # for blog in blogs.find():
-    #     print(blog)
+    for file in files.find():
+        print(file)
 
     
     
@@ -307,7 +314,23 @@ async def admin():
         return redirect(url_for('members'))   
     return await render_template('admin.html')
 
+
 @app.route('/upload', methods=['GET', 'POST'])
+async def upload():
+    if request.method == 'POST':
+        file = (await request.files)['file']
+        if file:
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(UPLOAD_FOLDER, filename))
+        files.insert_one({'file': file.filename})
+        return redirect(url_for('index'))
+    return await render_template('upload.html')
+
+
+
+    
+
+
 
 
 
