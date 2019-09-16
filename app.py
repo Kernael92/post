@@ -116,7 +116,7 @@ async def login():
                 session[user_id] = user['_id']
             await flash('Logged in successfully')
             return redirect(url_for('members'))
-
+    
         await flash(error)       
     return await render_template('login.html')
 
@@ -142,7 +142,7 @@ def login_required(view):
     @functools.wraps(view)
     def wrapped_view(**kwargs):
         if g.user is None:
-            return redirect(url_for('login'))
+            return redirect(url_for('register'))
         return view(**kwargs)
 
     return wrapped_view
@@ -194,7 +194,7 @@ async def index():
     users = myusers.find()
     print(db.list_collection_names())
     
-
+    
     # for blog in blogs.find():
     #     print(blog)
 
@@ -210,15 +210,18 @@ async def create():
     if request.method == 'POST':
         title = (await request.form)['title']
         body = (await request.form)['body']
+        author = (await request.form)['author']
         error = None 
 
-        if not title:
+        if not title :
             error = 'Title is required.'
+        elif not author:
+            error = 'Author required.'
         
         if error is not None:
             await flash(error)
         else:
-            blogs.insert_one({'title': title, 'body': body})
+            blogs.insert_one({'title': title, 'body': body, 'author':author})
 
             return redirect(url_for('members'))
 
@@ -241,7 +244,7 @@ def get_post(id, check_author=True):
             print(myusers.find())
     return blog
 
-@app.route('/update/<int:id>', methods=['GET', 'POST'])
+@app.route('/update/<id>', methods=['GET', 'POST'])
 @login_required
 async def update(id):
     blog = get_post(id)
@@ -257,19 +260,23 @@ async def update(id):
         if error is not None:
             await flash(error)
         elif  g.user['access'] == 'admin':
-            blogs.find_one_and_update({'title':{'$regex':blog['title']}, 'body':{'$regex':blog['body']}}, {'$set':{'title':title}, '$set':{'body':body}})
+            newblog = blogs.find_one_and_update({'title':{'$regex':blog['title']}, 'body':{'$regex':blog['body']}}, {'$set':{'title':title}, '$set':{'body':body}})
             return redirect(url_for('index'))
         else:
             await flash('Only admin can edit a post')
             return redirect(url_for('index'))
     return await render_template('update.html', blog=blog)
 
-@app.route('/delete/<int:id>', methods=['POST'])
+@app.route('/delete/<id>', methods=['POST'])
 @login_required
 async def delete(id):
-    get_post(id)
-    blogs.find_one_and_delete()
-    return redirect(url_for('index'))
+    blog = get_post(id)
+    if g.user['access'] == 'admin':
+        blogs.find_one_and_delete({'_id':blog['_id']})
+        return redirect(url_for('index'))
+    else:
+        await flash('Only admin can delete a post')
+        return redirect(url_for('index'))
 
 # The home page is accessible to anyone
 @app.route('/home')
@@ -288,7 +295,7 @@ async def members():
 
 # The admin page is to users with the 'admin' role
 @app.route('/admin')
-@role_required
+@login_required
 async def admin():
     # for user in myusers.find():
     if not g.user['access'] == 'admin':
