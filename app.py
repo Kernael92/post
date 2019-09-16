@@ -110,12 +110,12 @@ async def login():
                 error = 'Incorrect password'    
             elif not user['access']:
                 error = 'Incorrect access'
-            if error is None:
+            if error is None and user['access'] != 'user':
                 flask_login.login_user(user)
                 session.clear()
                 session[user_id] = user['_id']
             await flash('Logged in successfully')
-            return redirect(url_for('members'))
+            return redirect(url_for('admin'))
     
         await flash(error)       
     return await render_template('login.html')
