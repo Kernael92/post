@@ -10,10 +10,12 @@
 {% block content %}
 
 <br>
+
+{% for file in files %}
 <div class="container-fluid">
     <div class="card">
         <div class='card w-25 text-black bg-primary mb-3 '>
-            <img class="card-img-top" src="{{url_for('static', filename=filename)}}" alt="Card image cap">
+            <img class="card-img-top" src="static/{{file['file']}}" alt="Card image cap">
             <div class="card-body">
                 <article>
                     <header>
@@ -31,5 +33,7 @@
         </div>
     </div>   
 </div>
+{% endfor %}
+
 
 {% endblock content %}

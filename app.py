@@ -357,7 +357,7 @@ async def uploader():
     """
     Uploads and saves the file
     """
-    files.drop()
+    
 
     files_1 = files.find()
     
@@ -372,8 +372,8 @@ async def uploader():
             file.save(os.path.join(target, filename))
         files.insert_one({'file': filename})
         await flash('File successfully uploaded')
-        return redirect(url_for('uploaded_file', filename=filename))
-    # return await render_template('image.html', image_name=filename, files=files_1)
+        return redirect(url_for('images'))
+    return await render_template('image.html', image_name=filename, files=files_1)
 
 @app.route('/show/<filename>')
 async def uploaded_file(filename):
@@ -384,7 +384,10 @@ async def send_file(filename):
     target = os.path.join(APP_ROOT, 'static/')
     return send_from_directory(static, filename)
 
-
+@app.route('/images')
+async def images():
+    files_1 = files.find()
+    return await render_template('file.html', files=files_1)
 
             
 

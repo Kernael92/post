@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}IMAGES{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+
+<br>
+<div class="container-fluid">
+    {% for file in files %}
+    <div class="card-deck">
+        <div class='card w-75 text-black bg-primary mb-3 '>
+            <img class="card-img-top" src="static/{{file['file']}}" alt="Card image cap">
+        </div>
+    </div>
+    {% else %}
+        <div> <h1>No files available</h1></div>
+    {% endfor %}
+    
+    
+</div>
+{% endblock content %}
