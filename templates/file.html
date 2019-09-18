@@ -9,10 +9,16 @@
 <br>
 <div class="container-fluid">
     {% for file in files %}
-    <div class="card-deck">
-        <div class='card w-75 text-black bg-primary mb-3 '>
+    <div class="card-columns">
+        <div class='card '>
             <img class="card-img-top" src="static/{{file['file']}}" alt="Card image cap">
+            <div class="card-img-oevrlay">
+                <a href="static/{{file['file']}}" download>
+                <button>Download Image</button>
+
+            </div>
         </div>
+        
     </div>
     {% else %}
         <div> <h1>No files available</h1></div>
