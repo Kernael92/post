@@ -23,7 +23,7 @@
         <div class="card text-white" style="background-color: #341C09" id="card">
             <div class="card-body">
             {#<h5>Add an Image</h5>#}
-            <p class="card-text"><a id="card-text" href='{{ url_for("upload") }}'>Add an Image</p>
+            <p class="card-text"><a id="card-text" href='{{ url_for("upload") }}'>Upload an Image</p>
             </div>
             <div class="card-footer">
             </div>
@@ -39,5 +39,9 @@
         
     </div>
 </div>
+{#<div>
+    UPLOADED
+    <img src="{{url_for('static', filename=image_name)}}" alt="">
+</div>#}
 
 {% endblock %}

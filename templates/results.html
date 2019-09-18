@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Images{% endblock %}</h1>
+  {% if not g.user%}
+  <a class="action" href="{{ url_for('register') }}">Register to Upload an Image</a>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+
+<br>
+<div class="container-fluid">
+    {% for file_url in myfiles_urls%}
+    <div class="card-deck">
+        <div class='card w-25 text-black bg-primary mb-3 '>
+            <img class="card-img-top" src="{{file_url}}" alt="Card image cap">
+            <div class="card-body">
+                <article>
+                    <header>
+                        <h3 class="card-title" style="text-align: center;"></h3>
+                    </header>
+                    {# button to trigger modal #}
+                    {#<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal{{blog.title}}">Read blog</button>#}
+                    <body>
+                        <p></p>
+                    </body>
+                    <footer>
+                    <p style="color: #D4E4F7; text-align: center; font-style: italic; font-size:20px;">Uploaded by admin</p>
+                </article>
+            </div>
+        </div>
+    </div>   
+</div>
+{% endfor %}
+{% endblock content %}

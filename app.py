@@ -1,7 +1,7 @@
 import quart.flask_patch 
 import flask_login 
 from flask_login import current_user, login_required, login_user, logout_user
-from quart import Quart, render_template, request, redirect, url_for, session, flash, g, abort
+from quart import Quart, render_template, request, redirect, url_for, session, flash, g, abort, send_from_directory
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug import secure_filename
 
@@ -12,25 +12,29 @@ from bson import ObjectId
 # for ObjectId to work
 from pymongo import MongoClient
 import json
+from quart import jsonify
 from blog import User
 
-UPLOAD_FOLDER = '/tmp/'
+UPLOAD_FOLDER = '/target/'
 
 
 
 app = Quart(__name__)
-app.config['UPLOADER_FOLDER'] = UPLOAD_FOLDER
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.secret_key =b'\x85\x08\xcfu\xcd?\xff\xa9\x9a\xbfG\xd5\x9a\xa08\xf5'
+app.config['ALLOWED_IMAGE_EXTENSIONS'] = ['JPEG', 'JPG', 'PNG', 'GIF']
 # app.config['UPLOAD_FOLDER']
 # Defines path for upload folder
 # app.config['MAX_CONTENT_PATH']
-# Specifies max size of file to be uploaded
+# Specifies max size of file to be uploaded 
+APP_ROOT = os.path.dirname(os.path.abspath(__file__))
+target = os.path.join(APP_ROOT, 'static/')
 
 
 
 
 client = MongoClient("mongodb://127.0.0.1:27017")
-db = client.blog
+db = client.blog 
 blogs = db.blog 
 myusers = db.users
 files = db.files
@@ -203,40 +207,69 @@ async def index():
     # Displays posts
     blogs_1 = blogs.find()
     users = myusers.find()
+    files_1 = files.find()
     print(db.list_collection_names())
-    
+
     
     for file in files.find():
         print(file)
-
     
-    
-    return await render_template('index.html', blogs=blogs_1, users=myusers)
+    return await render_template('index.html', blogs=blogs_1, users=myusers, files=files_1)
 
+def allowed_image(filename):
+# We only want files with a . in the filename
+    if not '.' in filename:
+        return False 
 
+    # Split the extension from the filename 
+    ext = filename.rsplit('.', 1)[1]
 
+    # Check if the extension is in ALLOWED_IMAGE_EXTENSIONS
+    if ext.upper() in app.config['ALLOWED_IMAGE_EXTENSIONS']:
+        return True
+    else:
+        return False 
 @app.route('/create', methods = ['GET','POST'])
 @login_required
 async def create():
+    return await render_template('create.html')
+
+
+@app.route('/created', methods = ['GET','POST'])
+@login_required
+async def created():
+
+    target = os.path.join(APP_ROOT, 'static/')
+    if not os.path.isdir(target):
+        os.mkdir(target)
+
     if request.method == 'POST':
         title = (await request.form)['title']
         body = (await request.form)['body']
         author = (await request.form)['author']
+
+        image = (await request.files)['image']
+        if allowed_image(image.filename):
+            filename = secure_filename(image.filename)
+            image.save(os.path.join(target, filename))
+        
         error = None 
 
         if not title :
             error = 'Title is required.'
         elif not author:
             error = 'Author required.'
+        elif not image:
+            error = 'Image required'
         
         if error is not None:
             await flash(error)
         else:
-            blogs.insert_one({'title': title, 'body': body, 'author':author})
+            blogs.insert_one({'title': title, 'body': body, 'image': filename,'author':author})
 
-            return redirect(url_for('members'))
+            return redirect(url_for('index'))
 
-    return await render_template('create.html')
+    # return await render_template('index.html', image_name=filename)
 
 def get_post(id, check_author=True):
     '''
@@ -314,17 +347,50 @@ async def admin():
         return redirect(url_for('members'))   
     return await render_template('admin.html')
 
-
-@app.route('/upload', methods=['GET', 'POST'])
+@app.route('/upload')
 async def upload():
+    return await render_template('upload.html')
+
+
+@app.route('/uploader', methods=['GET', 'POST'])
+async def uploader():
+    """
+    Uploads and saves the file
+    """
+    files.drop()
+
+    files_1 = files.find()
+    
+    target = os.path.join(APP_ROOT, 'static/')
+    if not os.path.isdir(target):
+        os.mkdir(target)
+
     if request.method == 'POST':
         file = (await request.files)['file']
         if file:
             filename = secure_filename(file.filename)
-            file.save(os.path.join(UPLOAD_FOLDER, filename))
-        files.insert_one({'file': file.filename})
-        return redirect(url_for('index'))
-    return await render_template('upload.html')
+            file.save(os.path.join(target, filename))
+        files.insert_one({'file': filename})
+        await flash('File successfully uploaded')
+        return redirect(url_for('uploaded_file', filename=filename))
+    # return await render_template('image.html', image_name=filename, files=files_1)
+
+@app.route('/show/<filename>')
+async def uploaded_file(filename):
+    return await render_template('image.html', filename=filename)
+
+@app.route('/uploads/<filename>')
+async def send_file(filename):
+    target = os.path.join(APP_ROOT, 'static/')
+    return send_from_directory(static, filename)
+
+
+
+            
+
+
+
+
 
 
 

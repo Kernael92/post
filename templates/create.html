@@ -18,13 +18,18 @@
             <div class="col-md-6">
             <div class="row register-form">
                 <div class="form-group">
-                    <form method="post" class="create-post">
+                    <form action="{{url_for('created')}}" method="post" class="create-post" enctype="multipart/form-data">
                         <label for="title">Title</label>
                         <input name="title" id='title' value="{{request.form['title']}}" required>
                         <label for="body">Body</label>
                         <textarea name="body" id="body" >{{ request.form['body']}}</textarea>
                         <label for="author">Author</label>
                         <input type="text" name="author" id="author" value="{{request.form['author']}}" required>
+                        <label for="">Select Image</label>
+                        <div class="custom-file">
+                            <label for="image" class="custom-file-label"></label>
+                            <input class="custom-file-input" type='file' name='image' id='image' value="{{request.files['image']}}">   
+                        </div>
                         <input type="submit" value='save' class="btnRegister">
                     </form>
                 </div>
